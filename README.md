@@ -8,7 +8,7 @@ Five tabs: **Home** (dashboard), **Inquiries**, **Quotes**, **Invoices**, **Cust
 - Tap **+** to add a record. Tap any card to view, edit, change status or delete.
 - Inquiry -> **Create quote** -> **Create invoice** (details carry across, statuses update).
 - Quotes and invoices: items, optional 9% GST, **WhatsApp** share, **Print / PDF**.
-- Quotes/invoices: type your own number; attach a menu (image or PDF) - images print on the last page.
+- Quotes/invoices: enter a price per pax (total = guests x price), plus Additionals such as transport or labour; type your own number; attach a menu (image or PDF) - images print on the last page.
 - Venue: type a 6-digit Singapore postal code and the address fills in (needs internet).
 - Home -> **Company details & terms**: default contact person/number (Rajesh Paswan, +65 8376 3519), payment instructions (built in by default, with PayNow QR) and default general T&Cs printed on documents.
 - Backup/export as JSON (restorable), Excel, CSV or PDF.
