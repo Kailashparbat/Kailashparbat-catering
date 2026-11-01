@@ -93,8 +93,8 @@ const base=[['name','Customer name','text',1],['phone','Phone','tel'],['date','E
 const SL=['','Lunch','Dinner','Hi-Tea'];
 const CFG={
  inq:{t:'Inquiries',one:'Inquiry',p:'INQ-',st:['New','Contacted','Quoted','Closed'],f:[...base,['type','Event type','select',EV],['slot','Event slot','select',SL],['venue','Venue','text'],['notes','Notes','textarea']]},
- quote:{t:'Quotes',one:'Quotation',p:'QT-',doc:1,st:['Draft','Sent','Accepted','Rejected'],f:[...base,['upp','Price per pax (S$)','number'],['udesc','Per-pax line description','text'],['slot','Event slot','select',SL],['venue','Venue','text'],['ddate','Document date','date'],['addr','Bill-to address','textarea'],['attn','Attn.','text'],['fn','Contact person','text'],['fc','Contact no.','text'],['notes','General terms and conditions','textarea']]},
- inv:{t:'Invoices',one:'Invoice',p:'INV-',doc:1,st:['Unpaid','Paid'],f:[...base,['upp','Price per pax (S$)','number'],['udesc','Per-pax line description','text'],['slot','Event slot','select',SL],['venue','Venue','text'],['ddate','Document date','date'],['addr','Bill-to address','textarea'],['attn','Attn.','text'],['fn','Contact person','text'],['fc','Contact no.','text'],['notes','General terms and conditions','textarea']]},
+ quote:{t:'Quotes',one:'Quotation',p:'QT-',doc:1,st:['Draft','Sent','Accepted','Rejected'],f:[...base,['upp','Price per pax (S$)','number'],['slot','Event slot','select',SL],['venue','Venue','text'],['ddate','Document date','date'],['addr','Bill-to address','textarea'],['attn','Attn.','text'],['fn','Contact person','text'],['fc','Contact no.','text'],['notes','General terms and conditions','textarea']]},
+ inv:{t:'Invoices',one:'Invoice',p:'INV-',doc:1,st:['Unpaid','Paid'],f:[...base,['upp','Price per pax (S$)','number'],['slot','Event slot','select',SL],['venue','Venue','text'],['ddate','Document date','date'],['addr','Bill-to address','textarea'],['attn','Attn.','text'],['fn','Contact person','text'],['fc','Contact no.','text'],['notes','General terms and conditions','textarea']]},
  cust:{t:'Customers',one:'Customer',p:'C-',f:[['name','Name','text',1],['phone','Phone','tel'],['email','Email','email'],['company','Company','text'],['notes','Notes','textarea']]}
 };
 const TABS=[['home','📊','Home'],['inq','📋','Inquiries'],['quote','📝','Quotes'],['inv','🧾','Invoices'],['cust','👥','Customers']];
@@ -153,17 +153,17 @@ function openForm(k,id,pre){
  if(c.doc)h+=`<label>${c.one} number *</label><input id="no" value="${esc(id||nid(k,c.p))}"><div class="hint">Type your own number or keep the suggestion</div>`;
  h+=c.f.map(f=>{const v=o[f[0]]??'',a=`data-f="${f[0]}"`;
   return `<label>${f[1]}${f[3]===1?' *':''}</label>`+(f[2]=='select'?`<select ${a}>${f[3].map(s=>`<option value="${s}" ${s==v?'selected':''}>${s||'Select…'}</option>`).join('')}</select>`:f[2]=='textarea'?`<textarea ${a}>${esc(v)}</textarea>`:`<input ${a} type="${f[2]}" value="${esc(v)}">`)+(f[0]=='venue'?'<div class="hint">Type a 6-digit Singapore postal code to auto-fill the address</div>':'')}).join('');
- if(c.doc)h+=`<label>Other items (optional)</label><div id="its"></div><button class="ghost" style="margin-top:4px" onclick="row()">+ Add item</button><label>Additionals (transport, labour, etc.)</label><div id="ads"></div><button class="ghost" style="margin-top:4px" onclick="addRow()">+ Add additional</button><label>Menu (image or PDF)</label><input type="file" id="mf" accept="image/*,application/pdf" onchange="pickMenu(this.files[0])"><div class="hint" id="mn">${o.menu?esc(o.menu.name)+' attached':'No menu attached'}</div><button class="dng" style="margin-top:6px;padding:8px" onclick="MENU=null;$('#mn').textContent='Menu removed';$('#mf').value=''">Remove menu</button><label class="chk"><input type="checkbox" id="gst" ${o.gst===0?'':'checked'}> Add 9% GST</label><div class="kv tot"><span>Total</span><b id="tt"></b></div>`;
+ if(c.doc)h+=`<label>Description</label><input data-f="udesc" value="${esc(o.udesc??'')}" placeholder="Food Cost"><div class="hint">Shown on the per-pax line (guests × price per pax)</div><label>Additionals (transport, labour, etc.)</label><div id="ads"></div><button class="ghost" style="margin-top:4px" onclick="addRow()">+ Add additional</button><label>Menu (image or PDF)</label><input type="file" id="mf" accept="image/*,application/pdf" onchange="pickMenu(this.files[0])"><div class="hint" id="mn">${o.menu?esc(o.menu.name)+' attached':'No menu attached'}</div><button class="dng" style="margin-top:6px;padding:8px" onclick="MENU=null;$('#mn').textContent='Menu removed';$('#mf').value=''">Remove menu</button><label class="chk"><input type="checkbox" id="gst" ${o.gst===0?'':'checked'}> Add 9% GST</label><div class="kv tot"><span>Total</span><b id="tt"></b></div>`;
  h+=`<button class="pri" onclick="sv('${k}','${id||''}')">Save</button>`;
  sheet(h);
- if(c.doc){(o.items&&o.items.length?o.items:[{d:'',q:1,p:''}]).forEach(i=>row(i));(o.adds||[]).forEach(a=>addRow(a));calc()}
+ if(c.doc){[...(o.adds||[]),...(o.items||[]).filter(i=>i.d||i.p).map(i=>({d:i.q!=1?i.d+' × '+i.q:i.d,p:i.q*i.p}))].forEach(a=>addRow(a));calc()}
 }
 function row(i){
  i=i||{d:'',q:1,p:''};const r=document.createElement('div');r.className='it';
  r.innerHTML=`<input placeholder="Item" value="${esc(i.d)}"><input type="number" inputmode="decimal" placeholder="Qty" value="${i.q}"><input type="number" inputmode="decimal" placeholder="Price" value="${i.p}"><button onclick="this.parentNode.remove();calc()">✕</button>`;
  $('#its').append(r);
 }
-const items=()=>[...document.querySelectorAll('#its .it')].map(r=>{const n=r.querySelectorAll('input');return{d:n[0].value.trim(),q:+n[1].value||0,p:+n[2].value||0}}).filter(i=>i.d||i.p);
+const items=()=>[];
 function addRow(a){a=a||{d:'',p:''};const r=document.createElement('div');r.className='it';r.style.gridTemplateColumns='1fr 96px 34px';r.innerHTML=`<input placeholder="e.g. Transport" value="${esc(a.d)}"><input type="number" inputmode="decimal" placeholder="Amount" value="${a.p}"><button onclick="this.parentNode.remove();calc()">✕</button>`;$('#ads').append(r)}
 const adds=()=>[...document.querySelectorAll('#ads .it')].map(r=>{const n=r.querySelectorAll('input');return{d:n[0].value.trim(),p:+n[1].value||0}}).filter(a=>a.d||a.p);
 const fv=n=>{const e=document.querySelector('#sb [data-f='+n+']');return e?e.value:''};
